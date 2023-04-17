@@ -72,9 +72,9 @@
             </div>
           </div>
         </div>
-        <!-- User Form Modal -->
+      <!-- User Form Modal -->
         
-        <div class="modal fade" id="user-form-modal" tabindex="-1" aria-labelledby="user-form-modal" aria-hidden="true">
+      <div class="modal fade" id="user-form-modal" tabindex="-1" aria-labelledby="user-form-modal" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -112,6 +112,26 @@
         </div>
       </div>
 
+      <!-- User Delete Form Modal -->
+        
+      <div class="modal fade" id="delete-user-form-modal" tabindex="-1" aria-labelledby="delete-user-form-modal" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="UserModalLabel">Delete user</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="delete-user-id" value="" name="delete-user-id">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button id="confirm-delete-btn" type="button" class="btn btn-primary">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -127,27 +147,7 @@
         $.each(users, function(index, user) {
           console.log(user);
           appendRow(index, user);
-          /*let activeCircle = (user.user_status === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
-          html += '<tr>' +
-            '<td class="align-middle">' +
-            '<div class="custom-control custom-control-inline custom-checkbox custom-control-nameless m-0 align-top">' +
-            '<input type="checkbox" class="custom-control-input" id="item-' + index + '">' +
-            '<label class="custom-control-label" for="item-' + index + '"></label>' +
-            '</div>' +
-            '</td>' +
-            '<td class="text-nowrap align-middle">' + user.user_lastname + " " + user.user_firstname + '</td>' +
-            '<td class="text-nowrap align-middle"><span>' + user.user_role + '</span></td>' +
-            '<td class="text-center align-middle">' + activeCircle + '</td>' +
-            '<td class="text-center align-middle">' +
-            '<div class="btn-group align-top">' +
-            '<button class="btn btn-sm btn-outline-secondary badge" type="button" data-toggle="modal" data-target="#user-form-modal">Edit</button>' +
-            '<button class="btn btn-sm btn-outline-secondary badge" type="button"><i class="fa fa-trash"></i></button>' +
-            '</div>' +
-            '</td>' +
-            '</tr>';*/
-
         });
-        //$('#user-table tbody').append(html);
     },
     error: function(xhr, status, error) {
         console.log(error); // log any errors to console
@@ -159,8 +159,8 @@ function appendRow(index, user) {
           html = '<tr>' +
             '<td class="align-middle">' +
             '<div class="custom-control custom-control-inline custom-checkbox custom-control-nameless m-0 align-top">' +
-            '<input type="checkbox" class="custom-control-input" id="item-' + index + '">' +
-            '<label class="custom-control-label" for="item-' + index + '"></label>' +
+            '<input type="checkbox" class="custom-control-input" id="item-' + user.user_id + '">' +
+            '<label class="custom-control-label" for="item-' + user.user_id + '"></label>' +
             '</div>' +
             '</td>' +
             '<td class="text-nowrap align-middle">' + user.user_lastname + " " + user.user_firstname + '</td>' +
@@ -169,11 +169,15 @@ function appendRow(index, user) {
             '<td class="text-center align-middle">' +
             '<div class="btn-group align-top">' +
             '<button class="btn btn-sm btn-outline-secondary badge" type="button" data-toggle="modal" data-target="#user-form-modal">Edit</button>' +
-            '<button class="btn btn-sm btn-outline-secondary badge" type="button"><i class="fa fa-trash"></i></button>' +
+            '<button class="btn btn-sm btn-outline-secondary badge" data-user-id="' + user.user_id + '" type="button" data-toggle="modal" data-target="#delete-user-form-modal"><i class="fa fa-trash"></i></button>' +
             '</div>' +
             '</td>' +
             '</tr>';
   $('#user-table tbody').append(html);
+}
+
+function deleteRow() {
+  
 }
 
 $('#user-form-modal .modal-footer button.btn-primary').click(function() {
@@ -217,6 +221,41 @@ $('#user-form-modal .modal-footer button.btn-primary').click(function() {
     }
   });
 });
+
+$('#delete-user-form-modal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget); // Button that triggered the modal
+  var userId = button.data('user-id');
+  console.log(userId); // Extract info from data-* attributes
+  var modal = $(this);
+  modal.find('#delete-user-id').val(userId); // Populate the modal with the user ID
+});
+
+$('#confirm-delete-btn').on('click', function() {
+  var user_id = $('#delete-user-id').val() // Retrieve the user ID from the hidden input field
+  // Send an AJAX request to delete the user with the specified ID
+  $.ajax({
+    url: 'users/delete_user.php',
+    method: 'POST',
+    data: { user_id: user_id },
+    dataType: 'json',
+    success: function(response) {
+      // Handle the response from the server
+      if (response.status) {
+        $('#delete-user-form-modal').modal('hide')
+        alert('User deleted successfully!');
+      } else {
+        console.log(response.error);
+        alert(response.error.message);
+      }
+    },
+    error: function(xhr, textStatus, error) {
+      console.log(xhr.statusText);
+      console.log(textStatus);
+      console.log(error);
+      alert('Error deleting user. Please try again1.');
+    }
+  })
+})
 
 
 </script>
