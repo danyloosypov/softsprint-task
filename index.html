@@ -78,13 +78,14 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="UserModalLabel">Add user</h5>
+              <h5 class="modal-title" id="UserModalLabel">User form</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-body">
-              <form>
+              
+                <input type="hidden" id="user-id" name="user-id">
                 <div class="form-group">
                   <label for="first-name" class="col-form-label">First Name:</label>
                   <input type="text" class="form-control" id="first-name">
@@ -102,7 +103,7 @@
                   <option value="Admin">Admin</option>
                   <option value="User">User</option>
                 </select>
-              </form>
+              
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -137,6 +138,7 @@
 
 
 <script>
+
   $.ajax({
     url: 'users/get_users.php',
     type: 'GET',
@@ -156,19 +158,19 @@
 
 function appendRow(index, user) {
   let activeCircle = (user.user_status === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
-          html = '<tr>' +
+          html = '<tr data-user-id='+ user.user_id +'>' +
             '<td class="align-middle">' +
             '<div class="custom-control custom-control-inline custom-checkbox custom-control-nameless m-0 align-top">' +
             '<input type="checkbox" class="custom-control-input" id="item-' + user.user_id + '">' +
             '<label class="custom-control-label" for="item-' + user.user_id + '"></label>' +
             '</div>' +
             '</td>' +
-            '<td class="text-nowrap align-middle">' + user.user_lastname + " " + user.user_firstname + '</td>' +
-            '<td class="text-nowrap align-middle"><span>' + user.user_role + '</span></td>' +
-            '<td class="text-center align-middle">' + activeCircle + '</td>' +
+            '<td class="text-nowrap align-middle names">' + user.user_lastname + " " + user.user_firstname + '</td>' +
+            '<td class="text-nowrap align-middle role"><span>' + user.user_role + '</span></td>' +
+            '<td class="text-center align-middle circle">' + activeCircle + '</td>' +
             '<td class="text-center align-middle">' +
             '<div class="btn-group align-top">' +
-            '<button class="btn btn-sm btn-outline-secondary badge" type="button" data-toggle="modal" data-target="#user-form-modal">Edit</button>' +
+            '<button class="btn btn-sm btn-outline-secondary badge btn-edit-user" data-user-id="' + user.user_id + '" type="button">Edit</button>' +
             '<button class="btn btn-sm btn-outline-secondary badge" data-user-id="' + user.user_id + '" type="button" data-toggle="modal" data-target="#delete-user-form-modal"><i class="fa fa-trash"></i></button>' +
             '</div>' +
             '</td>' +
@@ -176,12 +178,14 @@ function appendRow(index, user) {
   $('#user-table tbody').append(html);
 }
 
-function deleteRow() {
-  
+function deleteRow(user_id) {
+  $('#user-table tr[data-user-id="' + user_id + '"]').remove();
 }
+
 
 $('#user-form-modal .modal-footer button.btn-primary').click(function() {
   // Get form data
+  let user_id = $('#user-id').val();
   let firstName = $('#first-name').val();
   let lastName = $('#last-name').val();
   let active = $('#active').is(':checked');
@@ -189,37 +193,72 @@ $('#user-form-modal .modal-footer button.btn-primary').click(function() {
   let role = $('#role-select').val();
   console.log(firstName, lastName, active, role);
 
-  // Send data to server
-  $.ajax({
-    url: 'users/add_user.php',
-    type: 'POST',
-    dataType: 'json',
-    data: {
-      firstName: firstName,
-      lastName: lastName,
-      active: active,
-      role: role
-    },
-    success: function(response) {
-      console.log(response);
-      if(response.status) {
-        appendRow(response.user.id, response.user);
-        $('#user-form-modal').modal('hide');
-        alert('User added successfully!');
-      } else {
-        console.log(response.error);
-        alert(response.error.message);
+  if(user_id > 0) {
+    $.ajax({
+      url: 'users/update_user.php',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        user_id: user_id,
+        firstName: firstName,
+        lastName: lastName,
+        active: active,
+        role: role
+      },
+      success: function(response) {
+        if(response.status) {
+          $('#user-form-modal').modal('hide');
+          alert('User updated successfully!');
+          let user = response.user;
+          console.log(user['user_firstname']);
+          var rowToUpdate = $('#user-table').find('tr[data-user-id="' + user['id'] + '"]');
+          rowToUpdate.find('.names').text(user['user_lastname'] + " " + user['user_firstname']);
+          rowToUpdate.find('.role').text(user['user_role']);
+          var activeCircle = (user['user_active'] === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
+          rowToUpdate.find('.circle').html(activeCircle);
+        } else {
+          console.log(response.error);
+          alert(response.error.message);
+        }      
+      },
+      error: function(xhr, textStatus, error) {
+        console.log(xhr.statusText);
+        console.log(textStatus);
+        console.log(error);
+        alert('Error updating user. Please try again1.');
       }
-      // Display success message and close modal
-      
-    },
-    error: function(xhr, textStatus, error) {
-      console.log(xhr.statusText);
-      console.log(textStatus);
-      console.log(error);
-      alert('Error adding user. Please try again1.');
-    }
-  });
+    });
+  } else {
+    $.ajax({
+      url: 'users/add_user.php',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        firstName: firstName,
+        lastName: lastName,
+        active: active,
+        role: role
+      },
+      success: function(response) {
+        console.log(response);
+        if(response.status) {
+          appendRow(response.user.id, response.user);
+          $('#user-form-modal').modal('hide');
+          alert('User added successfully!');
+        } else {
+          console.log(response.error);
+          alert(response.error.message);
+        }      
+      },
+      error: function(xhr, textStatus, error) {
+        console.log(xhr.statusText);
+        console.log(textStatus);
+        console.log(error);
+        alert('Error adding user. Please try again1.');
+      }
+    });
+  }
+  
 });
 
 $('#delete-user-form-modal').on('show.bs.modal', function (event) {
@@ -243,6 +282,7 @@ $('#confirm-delete-btn').on('click', function() {
       if (response.status) {
         $('#delete-user-form-modal').modal('hide')
         alert('User deleted successfully!');
+        deleteRow(user_id);
       } else {
         console.log(response.error);
         alert(response.error.message);
@@ -256,6 +296,39 @@ $('#confirm-delete-btn').on('click', function() {
     }
   })
 })
+
+
+$(document).on('click', '.btn-edit-user', function() {
+  // Get the user_id from the data attribute of the clicked button
+  var user_id = $(this).data('user-id');
+
+  $.ajax({
+    url: 'users/get_user.php',
+    type: 'GET',
+    data: {user_id: user_id}, // Pass user_id as data to fetch user data
+    dataType: 'json',
+    success: function(user) {
+      let userData = user[0];
+      console.log(userData);
+      // Update the modal window with the fetched user data
+      $('#user-id').val(userData['user_id']);
+      $('#first-name').val(userData['user_firstname']);
+      $('#last-name').val(userData['user_lastname']);
+      let active = false;
+      if(userData['user_status'] === 'Active') {
+        active = true;
+      }
+      $('#active').prop('checked', active);
+      $('#role-select').val(userData['user_role']).change();
+      
+      // Show the modal window
+      $('#user-form-modal').modal('show');
+    },
+    error: function(xhr, status, error) {
+      console.log(error); // log any errors to console
+    }
+  });
+});
 
 
 </script>
