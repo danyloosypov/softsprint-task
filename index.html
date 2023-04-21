@@ -24,13 +24,13 @@
                 <div class="my-container">
                   <button type="button" data-toggle="modal" data-target="#user-form-modal" class="btn btn-primary">Add</button>
                   <div class="right-corner">
-                    <select class="form-select" aria-label="Default select example">
-                      <option selected disabled>Plese Select</option>
+                    <select class="form-select" id="action-select" aria-label="Default select example">
+                      <option selected disabled>Please Select</option>
                       <option value="1">Set Active</option>
                       <option value="2">Set not Active</option>
                       <option value="3">Delete</option>
                     </select>
-                    <button type="button" class="btn btn-primary">Ok</button>
+                    <button type="button" id="confirm-table-btn" class="btn btn-primary">Ok</button>
                   </div>
                 </div>
                 <div class="e-table">
@@ -59,13 +59,13 @@
                 <div class="my-container">
                   <button type="button" data-toggle="modal" data-target="#user-form-modal" class="btn btn-primary">Add</button>
                   <div class="right-corner">
-                    <select class="form-select" aria-label="Default select example">
-                      <option selected disabled>Plese Select</option>
+                    <select class="form-select" id="action-select" aria-label="Default select example">
+                      <option selected disabled>Please Select</option>
                       <option value="1">Set Active</option>
                       <option value="2">Set not Active</option>
                       <option value="3">Delete</option>
                     </select>
-                    <button type="button" class="btn btn-primary">Ok</button>
+                    <button type="button" id="confirm-table-btn" class="btn btn-primary">Ok</button>
                   </div>
                 </div>
               </div>
@@ -133,11 +133,111 @@
         </div>
       </div>
 
+      <!-- Notification modal window -->
+      <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Please select at least one option in the select element or check at least one user in the table before proceeding.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <!-- Add your action button(s) here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
 
 <script>
+
+  $(document).on('change', '.user-checkbox', function() {
+    // Update select all checkbox state based on selected checkboxes
+    var allCheckboxes = $('.user-checkbox');
+    var allChecked = allCheckboxes.filter(':checked').length === allCheckboxes.length;
+    $('#all-items').prop('checked', allChecked);
+  });
+  
+  $(document).on('change', '#all-items', function() {
+    // Update all user checkboxes based on select all checkbox state
+    var isChecked = $(this).is(':checked');
+    $('.user-checkbox').prop('checked', isChecked);
+  });
+
+
+  $(document).on('click', '#confirm-table-btn', function() {
+    var selectedOption = $('#mySelect').val();
+    var excludedOption = 'disabled';
+
+    if (selectedOption === excludedOption) {
+      $('#confirmModal').modal('show');
+    }
+  
+    // Check if at least one user is checked in the table
+    if ($('.user-checkbox:checked').length === 0) {
+      // Show the modal
+      $('#confirmModal').modal('show');
+      return;
+    }
+
+
+    var selectedOption = $('#action-select').val();
+    var selectedUserIds = [];
+    $('.user-checkbox:checked').each(function() {
+      selectedUserIds.push($(this).closest('tr').data('user-id'));
+    });
+  
+    // Update users based on selected option
+    if (selectedOption === '1') {
+      selectedUserIds.forEach(async function(userId) {
+        try {
+          let user = await getUser(userId); // Fetch user data
+          console.log("ashjd lbak ", user);
+          // Call updateUser() with the fetched user data
+          await updateUser(userId, user["user_firstname"], user["user_lastname"], 'Active', user['user_role']);
+        } catch (error) {
+          console.error(error); // Log any errors
+        }
+      });
+      console.log('Set users as Active:', selectedUserIds);
+    } else if (selectedOption === '2') {
+      selectedUserIds.forEach(async function(userId) {
+        try {
+          let user = await getUser(userId); // Fetch user data
+          console.log("ashjd lbak ", user);
+          // Call updateUser() with the fetched user data
+          await updateUser(userId, user["user_firstname"], user["user_lastname"], 'Not active', user['user_role']);
+        } catch (error) {
+          console.error(error); // Log any errors
+        }
+      });
+      console.log('Set users as not Active:', selectedUserIds);
+    } else if (selectedOption === '3') {
+      selectedUserIds.forEach(function(user_id) {
+        deleteUser(user_id)
+      });
+      console.log('Delete users:', selectedUserIds);
+    } else {
+      $('#confirmModal').modal('show');
+    }
+
+    $('#user-table input[type="checkbox"]').prop('checked', false);
+  
+    // Reset select element to its default value
+    $('#mySelect').val('default-value');
+
+  });
+
+
 
   $.ajax({
     url: 'users/get_users.php',
@@ -161,7 +261,7 @@ function appendRow(index, user) {
           html = '<tr data-user-id='+ user.user_id +'>' +
             '<td class="align-middle">' +
             '<div class="custom-control custom-control-inline custom-checkbox custom-control-nameless m-0 align-top">' +
-            '<input type="checkbox" class="custom-control-input" id="item-' + user.user_id + '">' +
+            '<input type="checkbox" class="custom-control-input user-checkbox" id="item-' + user.user_id + '">' +
             '<label class="custom-control-label" for="item-' + user.user_id + '"></label>' +
             '</div>' +
             '</td>' +
@@ -182,18 +282,45 @@ function deleteRow(user_id) {
   $('#user-table tr[data-user-id="' + user_id + '"]').remove();
 }
 
+/*
+function updateUser(user_id, firstName, lastName, active, role) {
+  $.ajax({
+    url: 'users/update_user.php',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      user_id: user_id,
+      firstName: firstName,
+      lastName: lastName,
+      active: active,
+      role: role
+    },
+    success: function(response) {
+      if(response.status) {
+        alert('User updated successfully!');
+        let user = response.user;
+        console.log(user['user_firstname']);
+        var rowToUpdate = $('#user-table').find('tr[data-user-id="' + user['id'] + '"]');
+        rowToUpdate.find('.names').text(user['user_lastname'] + " " + user['user_firstname']);
+        rowToUpdate.find('.role').text(user['user_role']);
+        var activeCircle = (user['user_active'] === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
+        rowToUpdate.find('.circle').html(activeCircle);
+      } else {
+        console.log(response.error);
+        alert(response.error.message);
+      }      
+    },
+    error: function(xhr, textStatus, error) {
+      console.log(xhr.statusText);
+      console.log(textStatus);
+      console.log(error);
+      alert('Error updating user. Please try again1.');
+    }
+  });
+}*/
 
-$('#user-form-modal .modal-footer button.btn-primary').click(function() {
-  // Get form data
-  let user_id = $('#user-id').val();
-  let firstName = $('#first-name').val();
-  let lastName = $('#last-name').val();
-  let active = $('#active').is(':checked');
-  active = active ? "Active" : "Not active";
-  let role = $('#role-select').val();
-  console.log(firstName, lastName, active, role);
-
-  if(user_id > 0) {
+function updateUser(user_id, firstName, lastName, active, role) {
+  return new Promise(function(resolve, reject) {
     $.ajax({
       url: 'users/update_user.php',
       type: 'POST',
@@ -207,7 +334,6 @@ $('#user-form-modal .modal-footer button.btn-primary').click(function() {
       },
       success: function(response) {
         if(response.status) {
-          $('#user-form-modal').modal('hide');
           alert('User updated successfully!');
           let user = response.user;
           console.log(user['user_firstname']);
@@ -216,62 +342,83 @@ $('#user-form-modal .modal-footer button.btn-primary').click(function() {
           rowToUpdate.find('.role').text(user['user_role']);
           var activeCircle = (user['user_active'] === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
           rowToUpdate.find('.circle').html(activeCircle);
+          resolve(response); // Fulfill the Promise with the response object
         } else {
           console.log(response.error);
           alert(response.error.message);
+          reject(response.error); // Reject the Promise with the error object
         }      
       },
       error: function(xhr, textStatus, error) {
         console.log(xhr.statusText);
         console.log(textStatus);
         console.log(error);
-        alert('Error updating user. Please try again1.');
+        alert('Error updating user. Please try again.');
+        reject(error); // Reject the Promise with the error object
       }
     });
+  });
+}
+
+
+function addUser(firstName, lastName, active, role) {
+  $.ajax({
+    url: 'users/add_user.php',
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      firstName: firstName,
+      lastName: lastName,
+      active: active,
+      role: role
+    },
+    success: function(response) {
+      console.log(response);
+      if(response.status) {
+        appendRow(response.user.id, response.user);
+        $('#user-form-modal').modal('hide');
+        alert('User added successfully!');
+      } else {
+        console.log(response.error);
+        alert(response.error.message);
+      }      
+    },
+    error: function(xhr, textStatus, error) {
+      console.log(xhr.statusText);
+      console.log(textStatus);
+      console.log(error);
+      alert('Error adding user. Please try again1.');
+    }
+  });
+}
+
+$('#user-form-modal .modal-footer button.btn-primary').click(function() {
+  // Get form data
+  let user_id = $('#user-id').val();
+  let firstName = $('#first-name').val();
+  let lastName = $('#last-name').val();
+  let active = $('#active').is(':checked');
+  active = active ? "Active" : "Not active";
+  let role = $('#role-select').val();
+
+  if(user_id > 0) {
+    $('#user-form-modal').modal('hide');
+    updateUser(user_id, firstName, lastName, active, role);
   } else {
-    $.ajax({
-      url: 'users/add_user.php',
-      type: 'POST',
-      dataType: 'json',
-      data: {
-        firstName: firstName,
-        lastName: lastName,
-        active: active,
-        role: role
-      },
-      success: function(response) {
-        console.log(response);
-        if(response.status) {
-          appendRow(response.user.id, response.user);
-          $('#user-form-modal').modal('hide');
-          alert('User added successfully!');
-        } else {
-          console.log(response.error);
-          alert(response.error.message);
-        }      
-      },
-      error: function(xhr, textStatus, error) {
-        console.log(xhr.statusText);
-        console.log(textStatus);
-        console.log(error);
-        alert('Error adding user. Please try again1.');
-      }
-    });
+    addUser(firstName, lastName, active, role);
   }
   
 });
 
+
 $('#delete-user-form-modal').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget); // Button that triggered the modal
   var userId = button.data('user-id');
-  console.log(userId); // Extract info from data-* attributes
   var modal = $(this);
   modal.find('#delete-user-id').val(userId); // Populate the modal with the user ID
 });
 
-$('#confirm-delete-btn').on('click', function() {
-  var user_id = $('#delete-user-id').val() // Retrieve the user ID from the hidden input field
-  // Send an AJAX request to delete the user with the specified ID
+function deleteUser(user_id) {
   $.ajax({
     url: 'users/delete_user.php',
     method: 'POST',
@@ -280,7 +427,6 @@ $('#confirm-delete-btn').on('click', function() {
     success: function(response) {
       // Handle the response from the server
       if (response.status) {
-        $('#delete-user-form-modal').modal('hide')
         alert('User deleted successfully!');
         deleteRow(user_id);
       } else {
@@ -294,8 +440,17 @@ $('#confirm-delete-btn').on('click', function() {
       console.log(error);
       alert('Error deleting user. Please try again1.');
     }
-  })
-})
+  });
+}
+
+$('#confirm-delete-btn').on('click', function() {
+  var user_id = $('#delete-user-id').val() // Retrieve the user ID from the hidden input field
+  // Send an AJAX request to delete the user with the specified ID
+
+  deleteUser(user_id);
+  $('#delete-user-form-modal').modal('hide')
+  
+});
 
 
 $(document).on('click', '.btn-edit-user', function() {
@@ -330,8 +485,46 @@ $(document).on('click', '.btn-edit-user', function() {
   });
 });
 
+/*function getUser(user_id) {
+  return $.ajax({
+    url: 'users/get_user.php',
+    type: 'GET',
+    data: {user_id: user_id}, // Pass user_id as data to fetch user data
+    dataType: 'json',
+    success: function(user) {
+      let userData = user[0];
+      console.log("safdabjfsk n ", userData);
+      return userData;
+    },
+    error: function(xhr, status, error) {
+      console.log(error); // log any errors to console
+    }
+  });
+}*/
+
+function getUser(user_id) {
+  return new Promise(function(resolve, reject) {
+    $.ajax({
+      url: 'users/get_user.php',
+      type: 'GET',
+      data: {user_id: user_id},
+      dataType: 'json',
+      success: function(user) {
+        resolve(user[0]); // Resolve with the fetched user data
+      },
+      error: function(xhr, status, error) {
+        reject(error); // Reject with the error message
+      }
+    });
+  });
+}
+
 
 </script>
 
 </body>
 </html>
+
+
+
+
