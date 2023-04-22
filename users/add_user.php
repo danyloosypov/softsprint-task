@@ -22,7 +22,7 @@ if(!empty($first_name) && !empty($last_name) && !empty($active) && !empty($role)
                 'id' => $user_id,
                 'user_firstname' => $first_name,
                 'user_lastname' => $last_name,
-                'user_active' => $active,
+                'user_status' => $active,
                 'user_role' => $role
             )
             
@@ -39,8 +39,6 @@ if(!empty($first_name) && !empty($last_name) && !empty($active) && !empty($role)
           );
         echo json_encode($response);
     }
-
-    
 } else {
     $response = array(
         'status' => false,

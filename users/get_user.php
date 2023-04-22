@@ -2,23 +2,46 @@
 
 require_once("../db/dbconnection.php");
 
-$user_id = $_GET['user_id'];
+if (!empty($_GET['user_id'])) {
 
-$sql = "SELECT * FROM users where user_id = $user_id";
-$result = mysqli_query($connection, $sql);
+    $user_id = $_GET['user_id'];
 
-// create empty array for storing user data
-$users = array();
+    $sql = "SELECT * FROM users where user_id = $user_id";
+    $result = mysqli_query($connection, $sql);
+    
+    $user = $row = mysqli_fetch_assoc($result);
+    
+    // close database connection
+    mysqli_close($connection);
 
-// loop through each row and add to users array
-while ($row = mysqli_fetch_assoc($result)) {
-    $users[] = $row;
+    if(!empty($user)) {
+        $response = array(
+            'status' => true,
+            'error' => null,
+            'user' => $user
+        );
+        echo json_encode($response);
+    } else {
+        $response = array(
+            'status' => false,
+            'error' => array(
+                'code' => 404,
+                'message' => 'User not found.'
+            )
+        );
+        echo json_encode($response);
+    }
+} else {
+    $response = array(
+        'status' => false,
+        'error' => array(
+            'code' => 101,
+            'message' => 'User ID is required.'
+        )
+    );
+    echo json_encode($response);
 }
 
-// close database connection
-mysqli_close($connection);
 
-// return user data as JSON object
-echo json_encode($users);
 
 ?>

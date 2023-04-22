@@ -2,9 +2,8 @@
 
 require_once("../db/dbconnection.php");
 
-$userId = $_POST['user_id'];
+if (empty($_POST['user_id'])) {
 
-if (empty($userId)) {
   $response = array(
     'status' => false,
     'error' => array(
@@ -14,27 +13,30 @@ if (empty($userId)) {
   );
   echo json_encode($response);
 } else {
-    $sql = "delete from users WHERE user_id = $userId";
 
-    $res = mysqli_query($connection, $sql);
- 
-    if($res) {
-        $response = array(
-            'status' => true,
-            'error' => null
+  $userId = $_POST['user_id'];
+
+  $sql = "delete from users WHERE user_id = $userId";
+
+  $res = mysqli_query($connection, $sql);
+
+  if($res) {
+      $response = array(
+          'status' => true,
+          'error' => null
+      );
+
+      echo json_encode($response);
+  } else {
+      $response = array(
+          'status' => false,
+          'error' => array(
+            'code' => 102,
+            'message' => 'Error deleting user. Please try again.'
+          )
         );
-
-        echo json_encode($response);
-    } else {
-        $response = array(
-            'status' => false,
-            'error' => array(
-              'code' => 102,
-              'message' => 'Error deleting user. Please try again.'
-            )
-          );
-        echo json_encode($response);
-    }
+      echo json_encode($response);
+  }
 }
 
 ?>
