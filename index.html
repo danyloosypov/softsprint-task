@@ -365,13 +365,15 @@ function addUser(firstName, lastName, active, role) {
       } else {
         console.log(response.error);
         alert(response.error.message);
-      }      
+      }   
+      resetUpdateFormInputs();   
     },
     error: function(xhr, textStatus, error) {
       console.log(xhr.statusText);
       console.log(textStatus);
       console.log(error);
       alert('Error adding user. Please try again1.');
+      resetUpdateFormInputs();
     }
   });
 }
