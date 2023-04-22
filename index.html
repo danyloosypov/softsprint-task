@@ -99,7 +99,7 @@
                   <label for="active" class="lbl"></label>
                 </div>
                 <select id="role-select" class="form-select" aria-label="Default select example">
-                  <option selected disabled>Select Role</option>
+                  <option value="0" selected disabled>Select Role</option>
                   <option value="Admin">Admin</option>
                   <option value="User">User</option>
                 </select>
@@ -323,10 +323,12 @@ function updateUser(user_id, firstName, lastName, active, role) {
           rowToUpdate.find('.role').text(user['user_role']);
           var activeCircle = (user['user_status'] === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
           rowToUpdate.find('.circle').html(activeCircle);
+          resetUpdateFormInputs();
           resolve(response); // Fulfill the Promise with the response object
         } else {
           console.log(response.error);
           alert(response.error.message);
+          resetUpdateFormInputs();
           reject(response.error); // Reject the Promise with the error object
         }      
       },
@@ -434,6 +436,14 @@ $('#confirm-delete-btn').on('click', function() {
   
 });
 
+
+function resetUpdateFormInputs() {
+  $("#user-id").val("");  // Reset hidden input value
+  $("#first-name").val("");  // Reset first name input value
+  $("#last-name").val("");  // Reset last name input value
+  $("#active").prop("checked", true);  // Reset checkbox checked state
+  $("#role-select").val("0"); 
+}
 
 $(document).on('click', '.btn-edit-user', function() {
   // Get the user_id from the data attribute of the clicked button
