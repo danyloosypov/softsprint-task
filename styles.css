@@ -6,7 +6,16 @@ body{
   color: green;
 }
 .not-active-circle {
-  color: red;
+  color: gray;
+}
+
+.form-control {
+  display: flex;
+  align-items: center;
+}
+.form-control label {
+  flex: 0 0 100px; /* adjust width of labels as needed */
+  margin-right: 10px; /* adjust spacing between label and input as needed */
 }
 
 .lbl {

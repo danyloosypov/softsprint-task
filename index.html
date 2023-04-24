@@ -78,7 +78,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="UserModalLabel">User form</h5>
+              <h5 class="modal-title" id="UserModalLabel">User Add</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -126,6 +126,24 @@
             </div>
             <div class="modal-body">
               <input type="hidden" id="delete-user-id" value="" name="delete-user-id">
+              <div class="form-control">
+                <label for="#delete-name-input">Name</label>
+                <input type="text" name="name" value="Name" id="delete-name-input" disabled>
+              </div>
+              <br>
+              <div class="form-control">
+                <label for="#delete-status-input">Status</label>
+                <input type="text" name="role" value="Admin" id="delete-status-input" disabled>
+              </div>
+              <br>
+              <div class="form-control">
+                <label for="#delete-role-input">Role</label>
+                <input type="text" name="status" value="Active" id="delete-role-input" disabled>
+              </div>
+              
+              
+            </div>
+            <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               <button id="confirm-delete-btn" type="button" class="btn btn-primary">Confirm</button>
             </div>
@@ -143,7 +161,7 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="confirmModalBody">
               Please select at least one option in the select element or check at least one user in the table before proceeding.
             </div>
             <div class="modal-footer">
@@ -160,7 +178,7 @@
 
 <script>
 
-  $(document).on('change', '#action-select-1', function() {
+  /*$(document).on('change', '#action-select-1', function() {
     var selectedOption = $(this).val();
 
     // Set the selected value to action-select-2
@@ -172,7 +190,7 @@
       var selectedOption = $(this).val();
 
       $('#action-select-1').val(selectedOption);
-  });
+  });*/
 
   $(document).on('change', '.user-checkbox', function() {
     // Update select all checkbox state based on selected checkboxes
@@ -187,21 +205,28 @@
     $('.user-checkbox').prop('checked', isChecked);
   });
 
-  function applyChangesToTheTable() {
-    var selectedOption = $('#action-select-1').val();
+  function applyChangesToTheTable(btn_clicked) {
+
+    if (btn_clicked === 1) {
+      var selectedOption = $('#action-select-1').val();
+    } else if (btn_clicked === 2) {
+      var selectedOption = $('#action-select-2').val();
+    }
+
     var excludedOption = 'disabled';
 
-    if (selectedOption === excludedOption) {
+    if (selectedOption === null) {
+      $('#confirmModalBody').text('Please select a different option in the select element before proceeding.');
       $('#confirmModal').modal('show');
+      return;
     }
   
     // Check if at least one user is checked in the table
     if ($('.user-checkbox:checked').length === 0) {
-      // Show the modal
+      $('#confirmModalBody').text('Please check at least one user in the table before proceeding.');
       $('#confirmModal').modal('show');
       return;
     }
-
 
     //var selectedOption = $('#action-select-1').val();
     var selectedUserIds = [];
@@ -241,6 +266,8 @@
       $('#confirmModal').modal('show');
     }
 
+    $('#confirmModalBody').text('Please select at least one option in the select element or check at least one user in the table before proceeding.');
+    
     $('#user-table input[type="checkbox"]').prop('checked', false);
   
     $("#action-select-1 option[value='0'][disabled]").prop("selected", true);
@@ -249,11 +276,11 @@
 
 
   $(document).on('click', '#confirm-table-btn-1', function() {
-    applyChangesToTheTable();
+    applyChangesToTheTable(1);
   });
 
   $(document).on('click', '#confirm-table-btn-2', function() {
-    applyChangesToTheTable();
+    applyChangesToTheTable(2);
   });
 
   $.ajax({
@@ -289,7 +316,7 @@ function appendRow(index, user) {
             '<td class="text-center align-middle">' +
             '<div class="btn-group align-top">' +
             '<button class="btn btn-sm btn-outline-secondary badge btn-edit-user" data-user-id="' + user.user_id + '" type="button">Edit</button>' +
-            '<button class="btn btn-sm btn-outline-secondary badge" data-user-id="' + user.user_id + '" type="button" data-toggle="modal" data-target="#delete-user-form-modal"><i class="fa fa-trash"></i></button>' +
+            '<button class="btn btn-sm btn-outline-secondary badge btn-delete-user" data-user-id="' + user.user_id + '" type="button"><i class="fa fa-trash"></i></button>' +
             '</div>' +
             '</td>' +
             '</tr>';
@@ -315,7 +342,7 @@ function updateUser(user_id, firstName, lastName, active, role) {
       },
       success: function(response) {
         if(response.status) {
-          alert('User updated successfully!');
+          //alert('User updated successfully!');
           let user = response.user;
           console.log(user['user_firstname']);
           var rowToUpdate = $('#user-table').find('tr[data-user-id="' + user['id'] + '"]');
@@ -361,7 +388,7 @@ function addUser(firstName, lastName, active, role) {
         appendRow(response.user.id, response.user);
         console.log("qqqqqqqqqqqqq", response.user);
         $('#user-form-modal').modal('hide');
-        alert('User added successfully!');
+        //alert('User added successfully!');
       } else {
         console.log(response.error);
         alert(response.error.message);
@@ -372,7 +399,7 @@ function addUser(firstName, lastName, active, role) {
       console.log(xhr.statusText);
       console.log(textStatus);
       console.log(error);
-      alert('Error adding user. Please try again1.');
+      alert('Error adding user. Please try again.');
       resetUpdateFormInputs();
     }
   });
@@ -396,14 +423,6 @@ $('#user-form-modal .modal-footer button.btn-primary').click(function() {
   
 });
 
-
-$('#delete-user-form-modal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget); // Button that triggered the modal
-  var userId = button.data('user-id');
-  var modal = $(this);
-  modal.find('#delete-user-id').val(userId); // Populate the modal with the user ID
-});
-
 function deleteUser(user_id) {
   $.ajax({
     url: 'users/delete_user.php',
@@ -413,7 +432,7 @@ function deleteUser(user_id) {
     success: function(response) {
       // Handle the response from the server
       if (response.status) {
-        alert('User deleted successfully!');
+        //alert('User deleted successfully!');
         deleteRow(user_id);
       } else {
         console.log(response.error);
@@ -424,20 +443,18 @@ function deleteUser(user_id) {
       console.log(xhr.statusText);
       console.log(textStatus);
       console.log(error);
-      alert('Error deleting user. Please try again1.');
+      alert('Error deleting user. Please try again.');
     }
   });
 }
 
 $('#confirm-delete-btn').on('click', function() {
   var user_id = $('#delete-user-id').val() // Retrieve the user ID from the hidden input field
-  // Send an AJAX request to delete the user with the specified ID
 
   deleteUser(user_id);
   $('#delete-user-form-modal').modal('hide')
   
 });
-
 
 function resetUpdateFormInputs() {
   $("#user-id").val("");  // Reset hidden input value
@@ -463,7 +480,7 @@ $(document).on('click', '.btn-edit-user', function() {
     }
     $('#active').prop('checked', active);
     $('#role-select').val(userData['user_role']).change();
-    
+    $('#UserModalLabel').text("User Edit");
     // Show the modal window
     $('#user-form-modal').modal('show');
   }).catch(function(error) {
@@ -471,6 +488,23 @@ $(document).on('click', '.btn-edit-user', function() {
   });
 });
 
+$(document).on('click', '.btn-delete-user', function() {
+  // Get the user_id from the data attribute of the clicked button
+  var user_id = $(this).data('user-id');
+
+  // Call the getUser() function to fetch user data
+  getUser(user_id).then(function(userData) {
+    // Update the modal window with the fetched user data
+    //$('#user-id').val(userData['user_id']);
+    $('#delete-user-id').val(user_id);
+    $('#delete-name-input').val(userData['user_firstname'] + " " + userData['user_lastname']);
+    $('#delete-status-input').val(userData['user_status']);
+    $('#delete-role-input').val(userData['user_role']);
+    $('#delete-user-form-modal').modal('show');
+  }).catch(function(error) {
+    console.log(error); // log any errors to console
+  });
+});
 
 function getUser(user_id) {
   return new Promise(function(resolve, reject) {
