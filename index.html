@@ -178,19 +178,9 @@
 
 <script>
 
-  /*$(document).on('change', '#action-select-1', function() {
-    var selectedOption = $(this).val();
-
-    // Set the selected value to action-select-2
-    $('#action-select-2').val(selectedOption);
+  $('#user-form-modal').on('hidden.bs.modal', function (e) {
+    resetUpdateFormInputs();
   });
-
-  // Set change event handler for action-select-2
-  $(document).on('change', '#action-select-2', function() {
-      var selectedOption = $(this).val();
-
-      $('#action-select-1').val(selectedOption);
-  });*/
 
   $(document).on('change', '.user-checkbox', function() {
     // Update select all checkbox state based on selected checkboxes
@@ -369,7 +359,6 @@ function updateUser(user_id, firstName, lastName, active, role) {
     });
   });
 }
-
 
 function addUser(firstName, lastName, active, role) {
   $.ajax({
