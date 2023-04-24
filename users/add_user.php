@@ -19,7 +19,7 @@ if(!empty($first_name) && !empty($last_name) && !empty($active) && !empty($role)
             'status' => true,
             'error' => null,
             'user' => array(
-                'id' => $user_id,
+                'user_id' => $user_id,
                 'user_firstname' => $first_name,
                 'user_lastname' => $last_name,
                 'user_status' => $active,
