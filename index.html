@@ -163,7 +163,7 @@
               </button>
             </div>
             <div class="modal-body" id="confirmModalBody">
-              Please select at least one option in the select element or check at least one user in the table before proceeding.
+              Оберіть опцію та користувача
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -178,6 +178,12 @@
 
 
 <script>
+
+  $(document).ready(function() {
+    $('#confirmModal').on('hidden.bs.modal', function() {
+      $('#confirmModalBody').text('Оберіть опцію та користувача');
+    });
+  });
 
   $('#user-form-modal').on('hidden.bs.modal', function (e) {
     resetUpdateFormInputs();
@@ -206,18 +212,24 @@
 
     var excludedOption = 'disabled';
 
-    if (selectedOption === null) {
-      $('#confirmModalBody').text('Please select a different option in the select element before proceeding.');
+    if (selectedOption === null && $('.user-checkbox:checked').length > 0) {
+      $('#confirmModalBody').text('обраний користувач, натиснута кнопка «ОК», але не вибрано дію в селектбоксі');
       $('#confirmModal').modal('show');
       return;
     }
   
     // Check if at least one user is checked in the table
-    if ($('.user-checkbox:checked').length === 0) {
-      $('#confirmModalBody').text('Please check at least one user in the table before proceeding.');
+    if ($('.user-checkbox:checked').length === 0 && selectedOption !== null) {
+      $('#confirmModalBody').text(' не обрані користувачі, а в селектбоксі обрана опція та натиснута кнопка «ОК»');
       $('#confirmModal').modal('show');
       return;
     }
+
+    if ($('.user-checkbox:checked').length === 0 && selectedOption === null) {
+      $('#confirmModal').modal('show');
+      return;
+    }
+
 
     //var selectedOption = $('#action-select-1').val();
     var selectedUserIds = [];
