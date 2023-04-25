@@ -84,7 +84,7 @@
               </button>
             </div>
             <div class="modal-body">
-              
+                <h3 id="user-form-message"></h3>
                 <input type="hidden" id="user-id" name="user-id">
                 <div class="form-group">
                   <label for="first-name" class="col-form-label">First Name:</label>
@@ -125,6 +125,7 @@
               </button>
             </div>
             <div class="modal-body">
+              <h3 id="delete-form-message"></h3>
               <input type="hidden" id="delete-user-id" value="" name="delete-user-id">
               <div class="form-control">
                 <label for="#delete-name-input">Name</label>
@@ -344,7 +345,8 @@ function updateUser(user_id, firstName, lastName, active, role) {
           resolve(response); // Fulfill the Promise with the response object
         } else {
           console.log(response.error);
-          alert(response.error.message);
+          $('#user-form-message').text(response.error.message);
+          //alert(response.error.message);
           resetUpdateFormInputs();
           reject(response.error); // Reject the Promise with the error object
         }      
@@ -353,7 +355,8 @@ function updateUser(user_id, firstName, lastName, active, role) {
         console.log(xhr.statusText);
         console.log(textStatus);
         console.log(error);
-        alert('Error updating user. Please try again.');
+        $('#user-form-message').text('Error updating user. Please try again.');
+        //alert('Error updating user. Please try again.');
         reject(error); // Reject the Promise with the error object
       }
     });
@@ -380,7 +383,8 @@ function addUser(firstName, lastName, active, role) {
         //alert('User added successfully!');
       } else {
         console.log(response.error);
-        alert(response.error.message);
+        $('#user-form-message').text(response.error.message);
+        //alert(response.error.message);
       }   
       resetUpdateFormInputs();   
     },
@@ -388,7 +392,8 @@ function addUser(firstName, lastName, active, role) {
       console.log(xhr.statusText);
       console.log(textStatus);
       console.log(error);
-      alert('Error adding user. Please try again.');
+      $('#user-form-message').text('Error adding user. Please try again.');
+      //alert('Error adding user. Please try again.');
       resetUpdateFormInputs();
     }
   });
@@ -425,14 +430,16 @@ function deleteUser(user_id) {
         deleteRow(user_id);
       } else {
         console.log(response.error);
-        alert(response.error.message);
+        $('#delete-form-message').text(response.error.message);
+        //alert(response.error.message);
       }
     },
     error: function(xhr, textStatus, error) {
       console.log(xhr.statusText);
       console.log(textStatus);
       console.log(error);
-      alert('Error deleting user. Please try again.');
+      $('#delete-form-message').text('Error deleting user. Please try again.');
+      //alert('Error deleting user. Please try again.');
     }
   });
 }
@@ -442,10 +449,11 @@ $('#confirm-delete-btn').on('click', function() {
 
   deleteUser(user_id);
   $('#delete-user-form-modal').modal('hide')
-  
+  $('#delete-form-message').text("");
 });
 
 function resetUpdateFormInputs() {
+  $('#user-form-message').text("");
   $("#UserModalLabel").text("User Add");  // Reset hidden input value
   $("#user-id").val("");  // Reset hidden input value
   $("#first-name").val("");  // Reset first name input value
