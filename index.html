@@ -22,7 +22,7 @@
                   <h6 class="mr-2"><span>Users</span></h6>
                 </div>
                 <div class="my-container">
-                  <button type="button" data-toggle="modal" data-target="#user-form-modal" class="btn btn-primary">Add</button>
+                  <button type="button" data-toggle="modal" data-target="#user-form-modal" class="btn btn-primary add-user-button">Add</button>
                   <div class="right-corner">
                     <select class="form-select" id="action-select-1" aria-label="Default select example">
                       <option value="0" selected disabled>Please Select</option>
@@ -57,7 +57,7 @@
                   </div>
                 </div>
                 <div class="my-container">
-                  <button type="button" data-toggle="modal" data-target="#user-form-modal" class="btn btn-primary">Add</button>
+                  <button type="button" data-toggle="modal" data-target="#user-form-modal" class="btn btn-primary add-user-button">Add</button>
                   <div class="right-corner">
                     <select class="form-select" id="action-select-2" aria-label="Default select example">
                       <option value="0" selected disabled>Please Select</option>
@@ -178,6 +178,10 @@
 
 
 <script>
+
+  $('.add-user-button').on('click', function() {
+    resetUpdateFormInputs();
+  });
 
   $(document).ready(function() {
     $('#confirmModal').on('hidden.bs.modal', function() {
@@ -358,8 +362,7 @@ function updateUser(user_id, firstName, lastName, active, role) {
         } else {
           console.log(response.error);
           $('#user-form-message').text(response.error.message);
-          //alert(response.error.message);
-          resetUpdateFormInputs();
+          //resetUpdateFormInputs();
           reject(response.error); // Reject the Promise with the error object
         }      
       },
@@ -396,6 +399,7 @@ function addUser(firstName, lastName, active, role) {
       } else {
         console.log(response.error);
         $('#user-form-message').text(response.error.message);
+        return false;
         //alert(response.error.message);
       }   
       resetUpdateFormInputs();   
@@ -406,7 +410,8 @@ function addUser(firstName, lastName, active, role) {
       console.log(error);
       $('#user-form-message').text('Error adding user. Please try again.');
       //alert('Error adding user. Please try again.');
-      resetUpdateFormInputs();
+      return false;
+     // resetUpdateFormInputs();
     }
   });
 }
@@ -419,6 +424,11 @@ $('#user-form-modal .modal-footer button.btn-primary').click(function() {
   let active = $('#active').is(':checked');
   active = active ? "Active" : "Not active";
   let role = $('#role-select').val();
+
+  if (firstName === '' || lastName === '') {
+    $('#user-form-message').text('Some inputs are missing.'); // Display error message
+    return; // Exit the function
+  }
 
   if(user_id > 0) {
     $('#user-form-modal').modal('hide');
