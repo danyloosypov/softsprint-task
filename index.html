@@ -127,7 +127,7 @@
             <div class="modal-body">
               <h3 id="delete-form-message"></h3>
               <input type="hidden" id="delete-user-id" value="" name="delete-user-id">
-              <div class="form-control">
+              <!--<div class="form-control">
                 <label for="#delete-name-input">Name</label>
                 <input type="text" name="name" value="Name" id="delete-name-input" disabled>
               </div>
@@ -140,13 +140,13 @@
               <div class="form-control">
                 <label for="#delete-role-input">Role</label>
                 <input type="text" name="status" value="Active" id="delete-role-input" disabled>
-              </div>
-              
+              </div>-->
+              Are you sure you want to delete this item?
               
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button id="confirm-delete-btn" type="button" class="btn btn-primary">Confirm</button>
+              <button id="confirm-delete-btn" type="button" class="btn btn-danger">Confirm</button>
             </div>
           </div>
         </div>
@@ -317,7 +317,7 @@ function appendRow(index, user) {
             '<label class="custom-control-label" for="item-' + user.user_id + '"></label>' +
             '</div>' +
             '</td>' +
-            '<td class="text-nowrap align-middle names">' + user.user_lastname + " " + user.user_firstname + '</td>' +
+            '<td class="text-nowrap align-middle names">' + user.user_firstname + " " + user.user_lastname + '</td>' +
             '<td class="text-nowrap align-middle role"><span>' + user.user_role + '</span></td>' +
             '<td class="text-center align-middle circle">' + activeCircle + '</td>' +
             '<td class="text-center align-middle">' +
@@ -351,7 +351,7 @@ function updateUser(user_id, firstName, lastName, active, role) {
         if(response.status) {
           //alert('User updated successfully!');
           let user = response.user;
-          console.log(user['user_firstname']);
+          console.log(user);
           var rowToUpdate = $('#user-table').find('tr[data-user-id="' + user['id'] + '"]');
           rowToUpdate.find('.names').text(user['user_lastname'] + " " + user['user_firstname']);
           rowToUpdate.find('.role').text(user['user_role']);
@@ -453,6 +453,7 @@ function deleteUser(user_id) {
       } else {
         console.log(response.error);
         $('#delete-form-message').text(response.error.message);
+        return false;
         //alert(response.error.message);
       }
     },
@@ -461,6 +462,7 @@ function deleteUser(user_id) {
       console.log(textStatus);
       console.log(error);
       $('#delete-form-message').text('Error deleting user. Please try again.');
+      return false;
       //alert('Error deleting user. Please try again.');
     }
   });
@@ -468,7 +470,6 @@ function deleteUser(user_id) {
 
 $('#confirm-delete-btn').on('click', function() {
   var user_id = $('#delete-user-id').val() // Retrieve the user ID from the hidden input field
-
   deleteUser(user_id);
   $('#delete-user-form-modal').modal('hide')
   $('#delete-form-message').text("");
@@ -511,9 +512,8 @@ $(document).on('click', '.btn-edit-user', function() {
 $(document).on('click', '.btn-delete-user', function() {
   // Get the user_id from the data attribute of the clicked button
   var user_id = $(this).data('user-id');
-
   // Call the getUser() function to fetch user data
-  getUser(user_id).then(function(userData) {
+  /*getUser(user_id).then(function(userData) {
     // Update the modal window with the fetched user data
     //$('#user-id').val(userData['user_id']);
     $('#delete-user-id').val(user_id);
@@ -523,7 +523,9 @@ $(document).on('click', '.btn-delete-user', function() {
     $('#delete-user-form-modal').modal('show');
   }).catch(function(error) {
     console.log(error); // log any errors to console
-  });
+  });*/
+  $('#delete-user-id').val(user_id);
+  $('#delete-user-form-modal').modal('show');
 });
 
 function getUser(user_id) {
