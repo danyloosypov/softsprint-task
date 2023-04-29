@@ -354,7 +354,7 @@ function updateUser(user_id, firstName, lastName, active, role) {
           let user = response.user;
           console.log(user);
           var rowToUpdate = $('#user-table').find('tr[data-user-id="' + user['id'] + '"]');
-          rowToUpdate.find('.names').text(user['user_lastname'] + " " + user['user_firstname']);
+          rowToUpdate.find('.names').text(user['user_firstname'] + " " + user['user_lastname']);
           rowToUpdate.find('.role').text(user['user_role']);
           var activeCircle = (user['user_status'] === "Active") ? '<i class="fa fa-circle active-circle"></i>' : '<i class="fa fa-circle not-active-circle"></i>';
           rowToUpdate.find('.circle').html(activeCircle);
