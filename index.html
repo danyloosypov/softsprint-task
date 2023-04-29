@@ -141,7 +141,8 @@
                 <label for="#delete-role-input">Role</label>
                 <input type="text" name="status" value="Active" id="delete-role-input" disabled>
               </div>-->
-              Are you sure you want to delete this item?
+              <h5 id="delete-form-body"></h5>
+              
               
             </div>
             <div class="modal-footer">
@@ -512,20 +513,22 @@ $(document).on('click', '.btn-edit-user', function() {
 $(document).on('click', '.btn-delete-user', function() {
   // Get the user_id from the data attribute of the clicked button
   var user_id = $(this).data('user-id');
+  $('#delete-user-id').val(user_id);
   // Call the getUser() function to fetch user data
-  /*getUser(user_id).then(function(userData) {
+  getUser(user_id).then(function(userData) {
     // Update the modal window with the fetched user data
     //$('#user-id').val(userData['user_id']);
-    $('#delete-user-id').val(user_id);
-    $('#delete-name-input').val(userData['user_firstname'] + " " + userData['user_lastname']);
+    
+    $('#delete-form-body').text("Are you sure you want to delete this user " + userData['user_firstname'] + " " + userData['user_lastname'] + "?");
+    /*$('#delete-name-input').val(userData['user_firstname'] + " " + userData['user_lastname']);
     $('#delete-status-input').val(userData['user_status']);
-    $('#delete-role-input').val(userData['user_role']);
+    $('#delete-role-input').val(userData['user_role']);*/
     $('#delete-user-form-modal').modal('show');
   }).catch(function(error) {
     console.log(error); // log any errors to console
-  });*/
-  $('#delete-user-id').val(user_id);
-  $('#delete-user-form-modal').modal('show');
+  });
+  /*$('#delete-user-id').val(user_id);
+  $('#delete-user-form-modal').modal('show');*/
 });
 
 function getUser(user_id) {
