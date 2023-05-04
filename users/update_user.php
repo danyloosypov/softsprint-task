@@ -2,14 +2,16 @@
 
 require_once("../db/dbconnection.php");
 
-    $user_id = $_POST['user_id'];
+    $user_id = $_POST['id'];
     $firstname = $_POST['firstName']; 
     $lastname = $_POST['lastName']; 
     $active = $_POST['active']; 
     $role = $_POST['role']; 
 
-    if(!empty($user_id) && !empty($firstname) && !empty($lastname) && !empty($active) && !empty($role)) {
-        $sql = "update users set user_firstname = '$firstname', user_lastname = '$lastname', user_role = '$role', user_status = '$active' where user_id = $user_id";
+    error_log($active . " sdfsdf", 0);
+
+    if(!empty($user_id) && !empty($firstname) && !empty($lastname) && isset($active) && !empty($role)) {
+        $sql = "update users set firstname = '$firstname', lastname = '$lastname', role = '$role', status = '$active' where id = $user_id";
     
         $res = mysqli_query($connection, $sql);
      
@@ -19,10 +21,10 @@ require_once("../db/dbconnection.php");
                 'error' => null,
                 'user' => array(
                     'id' => $user_id,
-                    'user_firstname' => $firstname,
-                    'user_lastname' => $lastname,
-                    'user_status' => $active,
-                    'user_role' => $role
+                    'firstname' => $firstname,
+                    'lastname' => $lastname,
+                    'status' => $active,
+                    'role' => $role
                 )
                 
             );

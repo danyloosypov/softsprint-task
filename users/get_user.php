@@ -2,11 +2,11 @@
 
 require_once("../db/dbconnection.php");
 
-if (!empty($_GET['user_id'])) {
+if (!empty($_GET['id'])) {
 
-    $user_id = $_GET['user_id'];
+    $user_id = $_GET['id'];
 
-    $sql = "SELECT * FROM users where user_id = $user_id";
+    $sql = "SELECT * FROM users where id = $user_id";
     $result = mysqli_query($connection, $sql);
     
     $user = $row = mysqli_fetch_assoc($result);

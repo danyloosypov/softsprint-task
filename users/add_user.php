@@ -7,8 +7,8 @@ $last_name = $_POST['lastName'];
 $active = $_POST['active'];
 $role = $_POST['role'];
 
-if(!empty($first_name) && !empty($last_name) && !empty($active) && !empty($role)) {
-    $sql = "Insert into users (user_firstname, user_lastname, user_role, user_status) values ('$first_name', '$last_name', '$role', '$active')";
+if(!empty($first_name) && !empty($last_name) && isset($active) && !empty($role)) {
+    $sql = "Insert into users (firstname, lastname, role, status) values ('$first_name', '$last_name', '$role', '$active')";
 
     $res = mysqli_query($connection, $sql);
  
@@ -19,11 +19,11 @@ if(!empty($first_name) && !empty($last_name) && !empty($active) && !empty($role)
             'status' => true,
             'error' => null,
             'user' => array(
-                'user_id' => $user_id,
-                'user_firstname' => $first_name,
-                'user_lastname' => $last_name,
-                'user_status' => $active,
-                'user_role' => $role
+                'id' => $user_id,
+                'firstname' => $first_name,
+                'lastname' => $last_name,
+                'status' => $active,
+                'role' => $role
             )
             
         );
