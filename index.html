@@ -144,13 +144,13 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+              <h5 class="modal-title" id="confirmModalLabel">Notification</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-body" id="confirmModalBody">
-              Оберіть опцію та користувача
+              Select option and users
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -216,14 +216,14 @@
     var excludedOption = 'disabled';
 
     if (selectedOption === null && $('.user-checkbox:checked').length > 0) {
-      $('#confirmModalBody').text('обраний користувач, натиснута кнопка «ОК», але не вибрано дію в селектбоксі');
+      $('#confirmModalBody').text('User is selected and the button is pressed, but no option is selected');
       $('#confirmModal').modal('show');
       return;
     }
   
     // Check if at least one user is checked in the table
     if ($('.user-checkbox:checked').length === 0 && selectedOption !== null) {
-      $('#confirmModalBody').text(' не обрані користувачі, а в селектбоксі обрана опція та натиснута кнопка «ОК»');
+      $('#confirmModalBody').text('Option is selected and the button is pressed, but no user selected');
       $('#confirmModal').modal('show');
       return;
     }
@@ -418,16 +418,24 @@ function addUser(firstName, lastName, active, role) {
 $('#user-form-modal .modal-footer button.btn-primary').click(function() {
   // Get form data
   let user_id = $('#user-id').val();
-  let firstName = $('#first-name').val();
-  let lastName = $('#last-name').val();
+  let firstName = $('#first-name').val().trim();
+  let lastName = $('#last-name').val().trim();
   let active = $('#active').is(':checked');
   active = active ? '1' : '0';
   let role = $('#role-select').val();
 
   if (firstName === '' || lastName === '') {
-    $('#user-form-message').text('Some inputs are missing.'); // Display error message
-    return; // Exit the function
+    if(firstName === '' && lastName === '') {
+      $('#user-form-message').text('Lastname and Firstname inputs are missing.');
+    } else if(lastName === '') {
+      $('#user-form-message').text('Lastname is missing.');
+    } else if(firstName === '') {
+      $('#user-form-message').text('Firstname is missing.');
+    }
+    return;
   }
+
+  
 
   if(user_id > 0) {
     $('#user-form-modal').modal('hide');
@@ -455,6 +463,8 @@ function deleteUser(user_id) {
         return false;
         //alert(response.error.message);
       }
+      $('#delete-user-form-modal').modal('hide')
+      $('#delete-form-message').text("");
     },
     error: function(xhr, textStatus, error) {
       console.log(xhr.statusText);
@@ -470,8 +480,8 @@ function deleteUser(user_id) {
 $('#confirm-delete-btn').on('click', function() {
   var user_id = $('#delete-user-id').val() // Retrieve the user ID from the hidden input field
   deleteUser(user_id);
-  $('#delete-user-form-modal').modal('hide')
-  $('#delete-form-message').text("");
+  //$('#delete-user-form-modal').modal('hide')
+  //$('#delete-form-message').text("");
 });
 
 function resetUpdateFormInputs() {

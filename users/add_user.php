@@ -40,11 +40,25 @@ if(!empty($first_name) && !empty($last_name) && isset($active) && !empty($role))
         echo json_encode($response);
     }
 } else {
+  $arr = Array();
+  if(empty($first_name)) {
+    array_push($arr, "firstname");
+  }
+  if(empty($last_name)) {
+    array_push($arr, "lastname");
+  }
+  if(!isset($active)) {
+    array_push($arr, "status");
+  }
+  if(empty($role)) {
+    array_push($arr, "role");
+  }
+
     $response = array(
         'status' => false,
         'error' => array(
           'code' => 101,
-          'message' => 'Required fields are missing.'
+          'message' => 'Required fields are missing: ' . implode(', ', $arr)
         )
       );
       echo json_encode($response);

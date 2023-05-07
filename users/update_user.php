@@ -41,14 +41,28 @@ require_once("../db/dbconnection.php");
             echo json_encode($response);
         }
     } else {
+      $arr = Array();
+      if(empty($first_name)) {
+        array_push($arr, "firstname");
+      }
+      if(empty($last_name)) {
+        array_push($arr, "lastname");
+      }
+      if(!isset($active)) {
+        array_push($arr, "status");
+      }
+      if(empty($role)) {
+        array_push($arr, "role");
+      }
+    
         $response = array(
             'status' => false,
             'error' => array(
-              'code' => 102,
-              'message' => 'Some inputs are missing.'
+              'code' => 101,
+              'message' => 'Required fields are missing: ' . implode(', ', $arr)
             )
           );
-        echo json_encode($response);
+          echo json_encode($response);
     }
 
 
