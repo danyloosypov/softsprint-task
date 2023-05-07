@@ -549,6 +549,8 @@ function getUser(user_id) {
         resolve(response.user); // Resolve with the fetched user data
       },
       error: function(xhr, status, error) {
+        $('#confirmModalBody').text('Cant find user');
+        $('#confirmModal').modal('show');
         reject(error); // Reject with the error message
       }
     });
